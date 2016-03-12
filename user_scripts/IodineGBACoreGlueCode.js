@@ -17,7 +17,7 @@ var IodineGUI = {
         "sound":true,
         "volume":1,
         "skipBoot":false,
-        "toggleSmoothScaling":true,
+        "toggleSmoothScaling":false,
         "toggleDynamicSpeed":false,
         "keyZones":[
             //Use this to control the key mapping:
@@ -85,6 +85,18 @@ function registerAudioHandler() {
     var Mixer = new GlueCodeMixer();
     IodineGUI.mixerInput = new GlueCodeMixerInput(Mixer);
     IodineGUI.Iodine.attachAudioHandler(IodineGUI.mixerInput);
+}
+function fetch(url, callback) {
+    var oReq = new XMLHttpRequest();
+    oReq.open("GET", url, true);
+    oReq.responseType = "arraybuffer";
+    oReq.onload = function (oEvent) {
+      var arrayBuffer = oReq.response; // Note: not oReq.responseText
+      if (arrayBuffer) {
+        callback(arrayBuffer);
+      }
+    };
+    oReq.send(null);
 }
 function registerGUIEvents() {
     addEvent("keydown", document, keyDown);
@@ -205,6 +217,15 @@ function registerGUIEvents() {
         catch (e) {}
         IodineGUI.mixerInput.setVolume(IodineGUI.settings.volume);
     });
+
+    fetch("roms/gba.bin", function(bios) {
+        fetch("roms/kirby.gba", function(rom) {
+            attachBIOS(bios);
+            attachROM(rom);
+            IodineGUI.Iodine.play();
+        });
+    });
+
 }
 function registerGUISettings() {
     document.getElementById("sound").checked = IodineGUI.settings.sound;
